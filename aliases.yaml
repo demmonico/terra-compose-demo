@@ -1,13 +1,16 @@
-# TerraCompose config
+# Terra Compose config
 #
 # FORMAT:
-# alias_name:                           [allowed only A-Za-z0-9_ symbols]
-#   path: "path/to/project/base/dir"'   [required]
-#   workspace: "live"                   [optional, "default" will be used if exists and no more choice OR ask]
-#   tfvar: "nonprod"                    [optional, workspace name will be used if skip OR ask]
-#   tfversion: "x.x.x"                  [optional, from the global section will be used if omitted]
+#   default:                                [optional, used as a default across the aliases]
+#     tfversion: "x.x.x"                    [optional, but if alias also does not have this section, an error will be thrown]
+#   aliases:
+#     alias_name:                           [allowed only A-Za-z0-9_ symbols]
+#       path: "path/to/project/base/dir"'   [required]
+#       workspace: "live"                   [optional, "default" will be used if exists and no more choice OR ask]
+#       tfvar: "nonprod"                    [optional, workspace name will be used if skip OR ask]
+#       tfversion: "x.x.x"                  [optional, from the default section will be used if omitted]
 
-global:
+default:
   tfversion: "1.4.6"
 
 aliases:
