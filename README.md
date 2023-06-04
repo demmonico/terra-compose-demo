@@ -14,15 +14,21 @@ Besides that, there is an example of the aliases file, that is required for corr
 - follow [Terra Compose tool](https://github.com/demmonico/terra-compose) installation steps
 - since this example is based on AWS -> setup AWS CLI access
   - get `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` env vars for your user from the AWS Console 
-  - configure AWS CLI: `aws configure --profile <your_profile_name>` (see [docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for details)
-  - export `AWS_PROFILE` env var containing selected profile name `export AWS_PROFILE=<your_profile_name>`
+  - configure AWS CLI (see [docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for details):
+    ```shell
+    $ aws configure --profile <YOUR_AWS_PROFILE_NAME>
+    ```
+  - export the selected AWS profile with sufficient privileges in your current shell 
+    ```shell
+    $ export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
+    ```
 - cd to the root of your repo and create aliases file with projects aliases in the following format:
   ```yaml
   aliases:
-  alias_name:                           # [allowed only A-Za-z0-9_ symbols]
-    path: "path/to/project/base/dir"    # [required]
-    workspace: "live"                   # [optional, "default" will be used if exists and no more choice OR ask]
-    tfvar: "nonprod"                    # [optional, workspace name will be used if skip OR ask]
-    tfversion: "x.x.x"                  # [optional, from the global section will be used if omitted]
+    alias_name:                           # [allowed only A-Za-z0-9_ symbols]
+      path: "path/to/project/base/dir"    # [required]
+      workspace: "live"                   # [optional, "default" will be used if exists and no more choice OR ask]
+      tfvar: "nonprod"                    # [optional, workspace name will be used if skip OR ask]
+      tfversion: "x.x.x"                  # [optional, from the global section will be used if omitted]
   ```
 - done!
