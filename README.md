@@ -23,5 +23,6 @@ Besides that, there is an example of the aliases file, that is required for corr
     path: "path/to/project/base/dir"    # [required]
     workspace: "live"                   # [optional, "default" will be used if exists and no more choice OR ask]
     tfvar: "nonprod"                    # [optional, workspace name will be used if skip OR ask]
+    tfversion: "x.x.x"                  # [optional, from the global section will be used if omitted]
   ```
 - done!
