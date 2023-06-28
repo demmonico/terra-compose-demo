@@ -7,7 +7,7 @@
 #     alias_name:                           [allowed only A-Za-z0-9_ symbols]
 #       path: "path/to/project/base/dir"'   [required]
 #       workspace: "live"                   [optional, "default" will be used if exists and no more choice OR ask]
-#       tfvar: "nonprod"                    [optional, workspace name will be used if skip OR ask]
+#       tfvars: "nonprod"                    [optional, workspace name will be used if skip OR ask]
 #       tfversion: "x.x.x"                  [optional, from the default section will be used if omitted]
 
 default:
@@ -55,21 +55,21 @@ aliases:
   runners_STG:
     path: "projects/runners"
     workspace: "staging"
-    tfvar: "nonprod"
+    tfvars: "nonprod"
   runners_PROD:
     path: "projects/runners"
     workspace: "production"
 
   docs:
     path: "environments/docs"
-    tfvar: "-"
+    tfvars: "-"
     tfversion: "1.2.1"
 
   images_STG:
     path: "environments/images/staging"
-    tfvar: "-"
+    tfvars: "-"
     tfversion: "1.3.4"
   images_PROD:
     path: "environments/images/prod"
-    tfvar: "-"
+    tfvars: "-"
     tfversion: "1.2.1"
