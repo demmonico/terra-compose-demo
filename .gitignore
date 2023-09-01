@@ -1,0 +1,6 @@
+# IDE
+.idea
+
+# TF temp files
+.terraform
+*.tfplan

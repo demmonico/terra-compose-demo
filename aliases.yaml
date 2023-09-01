@@ -1,0 +1,75 @@
+# Terra Compose config
+#
+# FORMAT:
+#   default:                                [optional, used as a default across the aliases]
+#     tfversion: "x.x.x"                    [optional, but if alias also does not have this section, an error will be thrown]
+#   aliases:
+#     alias_name:                           [allowed only A-Za-z0-9_ symbols]
+#       path: "path/to/project/base/dir"'   [required]
+#       workspace: "live"                   [optional, "default" will be used if exists and no more choice OR ask]
+#       tfvars: "nonprod"                    [optional, workspace name will be used if skip OR ask]
+#       tfversion: "x.x.x"                  [optional, from the default section will be used if omitted]
+
+default:
+  tfversion: "1.4.6"
+
+aliases:
+
+  common_STG:
+    path: "common"
+    workspace: "nonprod"
+  common_PROD:
+    path: "common"
+    workspace: "production"
+
+  cms_STG:
+    path: "projects/cms"
+    workspace: "staging"
+  cms_RELEASE:
+    path: "projects/cms"
+    workspace: "release"
+  cms_TRAINING:
+    path: "projects/cms"
+    workspace: "training"
+  cms_PROD:
+    path: "projects/cms"
+    workspace: "production"
+
+  portal_app_INT:
+    path: "projects/portal/app"
+    workspace: "integration"
+    tfversion: "1.3.4"
+  portal_app_LIVE:
+    path: "projects/portal/app"
+    workspace: "live"
+    tfversion: "1.3.4"
+  portal_platform_INT:
+    path: "projects/portal/platform"
+    workspace: "integration"
+    tfversion: "1.3.4"
+  portal_platform_LIVE:
+    path: "projects/portal/platform"
+    workspace: "live"
+    tfversion: "1.3.4"
+
+  runners_STG:
+    path: "projects/runners"
+    workspace: "staging"
+    tfvars: "nonprod"
+  runners_PROD:
+    path: "projects/runners"
+    workspace: "production"
+
+  docs:
+    path: "environments/docs"
+    tfvars: "-"
+    tfversion: "1.2.1"
+
+  images_STG:
+    path: "environments/images/staging"
+    tfvars: "-"
+    tfversion: "1.3.4"
+  images_PROD:
+    path: "environments/images/prod"
+    tfvars: "-"
+    tfversion: "1.2.1"
