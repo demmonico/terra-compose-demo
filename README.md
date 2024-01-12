@@ -36,6 +36,9 @@ Here are a few demos covering different aspects of `Terra Compose`'s usage.
 - **we have** a full transparency on what commands are we running
 - **we do not depend** on the internal project's structure or it's path; alias handle that for us
 
+**Note 2**: 
+It was recorded for `Terra Compose` version `1.0`. **Latest version has some differences.** 
+
 #### Plan demo
 
 ![](_demo/ignite/tc-usage-ignite-plan.gif)
@@ -88,8 +91,11 @@ tc help
 #### Demo usage
 
 
-<details><summary open>
+<details open>
+<summary>
+
 ##### Full demo script (Terra Compose v1.3)
+
 </summary>
 
 ```shell
@@ -186,8 +192,11 @@ aws-describe-sgs
 </details>
 
 
-<details><summary>
+<details>
+<summary>
+
 ##### Full demo script (Terra Compose v1.0)
+
 </summary>
 
 ```shell
@@ -229,8 +238,11 @@ tc help
 </details>
 
 
-<details><summary>
+<details>
+<summary>
+
 ##### Short demo script (Terra Compose v1.0)
+
 </summary>
 
 ```shell
