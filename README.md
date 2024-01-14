@@ -53,19 +53,25 @@ It was recorded for `Terra Compose` version `1.0`. **Latest version has some dif
 
 ### Demo script
 
+Pre-requisites and assumptions:
+- usage AWS as a cloud provider
+- keep TF state locally for simplicity, **don't do that in production!!!**
+- all projects just creates VPCs and SGs for simplicity and speed
+
 #### Demo preparation and clean-up
 
 ```shell
-# clean terminal
-history -p && clear
 # remove previous installation if exists
 sudo rm -rf /usr/local/bin/tc tc-demo
+# clean terminal
+history -p && clear
 # check AWS credentials and export AWS profile
 cat ~/.aws/credentials | grep -A 3 demmonico | sed 's/ = .*$/ = \*\*\*/'
 export AWS_DEFAULT_PROFILE=demmonico && echo $AWS_DEFAULT_PROFILE
 # prepare useful aliases
-alias aws-describe-vpcs="aws ec2 describe-vpcs --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==\`Name\`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager"
-alias aws-describe-sgs="aws ec2 describe-security-groups --output text --query \"SecurityGroups[*].[GroupName, VpcId]\" --no-cli-pager | sort"
+alias list-aws-vpcs="aws ec2 describe-vpcs --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==\`Name\`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager"
+alias list-aws-sgs="aws ec2 describe-security-groups --output text --query \"SecurityGroups[*].[GroupName, VpcId]\" --no-cli-pager | sort"
+list-aws-vpcs && list-aws-sgs
 ```
 
 #### Demo installation
@@ -78,10 +84,6 @@ wget -q https://raw.githubusercontent.com/demmonico/terra-compose/master/tc \
   && which tc
 # clone repo with demo projects
 git clone https://github.com/demmonico/terra-compose-demo.git tc-demo && cd tc-demo
-# list of available commands
-tc | grep -B 15 '>>>'
-# list of available aliases
-tc | grep -E '^(\s)+[A-Za-z0-9_]+:(\s)*$' | sed -e 's/^[[:space:]]*//' | awk -F ":" '{print $1}'
 
 # now we are able to run any Terraform command against any project we have
 # we can check available actions and aliases using 'help' action
@@ -105,59 +107,27 @@ tc help
 tree common && tc | grep -A 4 'common_'
 
 # check that we have only default VPC
-aws-describe-vpcs
+list-aws-vpcs
 
 # the simplest use-case
 tc plan common_STG
 tc workspaces common_STG
 tc apply common_STG
+
+# use-case: custom tfvars file, debug mode and run command in container
+tc plan common_PROD
+# init and validation steps can be skipped by adding '-debug' suffix to the 'plan' and 'apply' actions
+tc apply-debug common_PROD
 # also we can proxy any call via 'run' action
 tc run common_STG terraform state list
 
-# use-case: custom tfvars file
-tc plan common_PROD
-tc apply common_PROD
-
 # check that we have +2 VPCs
-aws-describe-vpcs
-
-
-### environments/docs >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# use-cases: env-based code structure with default WS and no tfvars file
-tree environments/docs && tc | grep -A 5 'docs:'
-
-# check that we have only default SGs
-aws-describe-sgs
-
-tc plan docs
-tc apply docs
-
-# check that we have +1 SGs
-aws-describe-sgs
-
-
-### projects/portal/platform >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# use-cases: nested folder structure, debug mode and run command in container
-tree projects/portal
-tree projects/portal/platform && tc | grep -A 3 'portal_platform_'
-
-# use-case: nested folder structure and debug mode
-tc plan portal_platform_INT
-# init and validation steps can be skipped by adding '-debug' suffix to the 'plan' and 'apply' actions
-tc apply-debug portal_platform_INT
-
-# use-case: run command in container
-tc run portal_platform_LIVE terraform init
-tc run portal_platform_LIVE terraform workspace select live
-tc plan-debug portal_platform_LIVE
-tc apply-debug portal_platform_LIVE
-
-# check that we have +2 SGs
-aws-describe-sgs
+list-aws-vpcs
 
 
 ### projects/portal/app >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# use-cases: backend-config, hooks and shell into container
+# use-cases: nested folder structure, backend-config, hooks and shell into container
+tree projects/portal
 tree projects/portal/app && tc | grep -A 5 'portal_app_'
 
 # use-case: backend-config and hooks
@@ -167,7 +137,7 @@ tc apply-debug portal_app_INT
 # check that experiment state has been changed
 tree projects/portal/app
 # check that we have +1 SGs
-aws-describe-sgs
+list-aws-sgs
 
 # use-case: hook usage and shell into container
 # still contains info about the experiment state
@@ -177,8 +147,6 @@ tc shell portal_app_LIVE
 
 ### inside container ###
 terraform workspace list
-terraform init
-terraform workspace list
 exit
 ###
 
@@ -186,7 +154,7 @@ tc plan portal_app_LIVE
 tc apply-debug portal_app_LIVE
 
 # check that we have +1 SGs
-aws-describe-sgs
+list-aws-sgs
 ```
 
 </details>
@@ -267,11 +235,10 @@ tc apply common_STG
 
 Useful for development\presentation
 ```shell
-# to clear: rm -rf ~/Documents/tc-install
-
-ttyrec ~/Documents/tc-install
-# OR ttyrec -a ~/Documents/tc-install
-ttygif ~/Documents/tc-install -f
+# list of available commands
+tc | grep -B 15 '>>>'
+# list of available aliases
+tc | grep -E '^(\s)+[A-Za-z0-9_]+:(\s)*$' | sed -e 's/^[[:space:]]*//' | awk -F ":" '{print $1}'
 ```
 
 **[!!! IMPORTANT !!!]** Following instructions should be used **VERY CAREFULLY!**
@@ -301,4 +268,12 @@ find . -type d -name '.terraform' -exec sudo rm -rf {} \;
 
 # find all TF state changes
 find . -type f -name '*.tfstate.backup'
+```
+
+Useful for presentation
+```shell
+ttyrec ~/Documents/tc-install
+# OR ttyrec -a ~/Documents/tc-install
+ttygif ~/Documents/tc-install -f
+ttyplay ~/Documents/tc-install
 ```
