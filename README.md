@@ -24,11 +24,14 @@ Besides that, there is an example of the aliases file, that is required for corr
   ```
 - done!
 
-## Demo run
+## Demo
 
 Here are a few demos covering different aspects of `Terra Compose`'s usage.
 
-### Demo screencast
+Pre-requisites and assumptions:
+- usage AWS as a cloud provider
+- keep TF state locally for simplicity, **don't do that in production!!!**
+- all projects just creates VPCs and SGs for simplicity and speed
 
 **Note**: 
 - **we need** to export AWS_DEFAULT_PROFILE env var in order to let Terraform connect to AWS (for sure, only when you're using AWS)
@@ -36,85 +39,83 @@ Here are a few demos covering different aspects of `Terra Compose`'s usage.
 - **we have** a full transparency on what commands are we running
 - **we do not depend** on the internal project's structure or it's path; alias handle that for us
 
-**Note 2**: 
-It was recorded for `Terra Compose` version `1.0`. **Latest version has some differences.** 
 
-#### Plan demo
 
-![](_demo/ignite/tc-usage-ignite-plan.gif)
+<details open>
+<summary>
 
-#### Apply demo
+### Installation demo
 
-![](_demo/ignite/tc-usage-ignite-apply.gif)
+</summary>
 
-#### Full demo
+![](_demo/screencasts/tc-install.gif)
 
-![](_demo/full/tc-usage-full.gif)
-
-### Demo script
-
-Pre-requisites and assumptions:
-- usage AWS as a cloud provider
-- keep TF state locally for simplicity, **don't do that in production!!!**
-- all projects just creates VPCs and SGs for simplicity and speed
-
-#### Demo preparation and clean-up
+##### Demo preparation and clean-up
 
 ```shell
 # remove previous installation if exists
 sudo rm -rf /usr/local/bin/tc tc-demo
 # clean terminal
 history -p && clear
-# check AWS credentials and export AWS profile
+# checking AWS credentials and export AWS profile
 cat ~/.aws/credentials | grep -A 3 demmonico | sed 's/ = .*$/ = \*\*\*/'
 export AWS_DEFAULT_PROFILE=demmonico && echo $AWS_DEFAULT_PROFILE
-# prepare useful aliases
+# preparing useful aliases
 alias list-aws-vpcs="aws ec2 describe-vpcs --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==\`Name\`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager"
 alias list-aws-sgs="aws ec2 describe-security-groups --output text --query \"SecurityGroups[*].[GroupName, VpcId]\" --no-cli-pager | sort"
 list-aws-vpcs && list-aws-sgs
 ```
 
-#### Demo installation
+##### Demo installation
 
 ```shell
-# install Terra Compose
+# installing Terra Compose
 wget -q https://raw.githubusercontent.com/demmonico/terra-compose/master/tc \
   && chmod +x tc \
   && sudo mv -f ${PWD}/tc /usr/local/bin/tc \
   && which tc
-# clone repo with demo projects
+# cloning the demo repo
 git clone https://github.com/demmonico/terra-compose-demo.git tc-demo && cd tc-demo
 
-# now we are able to run any Terraform command against any project we have
+# now we are able to run any Terraform command against any project we have locally
 # we can check available actions and aliases using 'help' action
 tc help
 ```
 
-#### Demo usage
+</details>
+
 
 
 <details open>
 <summary>
 
-##### Full demo script (Terra Compose v1.3)
+### Simple usage demo
 
 </summary>
 
+Recorded for _Terra Compose v1.3_
+
+![](_demo/screencasts/tc-simple.gif)
+
 ```shell
 ### common >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# creates a VPCs used by all other projects
-# use-cases: simplest and with custom tfvars file
+### example: simple plan and apply actions
+# let's create a VPCs that will be used by all other projects
 tree common && tc | grep -A 4 'common_'
 
 # check that we have only default VPC
 list-aws-vpcs
 
-# the simplest use-case
+# plan action
+# note that it automatically runs TF init and validation and shows info about the workspace and tfvars file 
 tc plan common_STG
+# list workspaces action
 tc workspaces common_STG
+# apply action based on the pre-built plan
 tc apply common_STG
 
-# use-case: custom tfvars file, debug mode and run command in container
+### example: tfvars file overriding, debug mode and run action
+# plan action
 tc plan common_PROD
 # init and validation steps can be skipped by adding '-debug' suffix to the 'plan' and 'apply' actions
 tc apply-debug common_PROD
@@ -123,15 +124,37 @@ tc run common_STG terraform state list
 
 # check that we have +2 VPCs
 list-aws-vpcs
+```
+
+</details>
 
 
+
+<details>
+<summary>
+
+### Advanced usage demo
+
+</summary>
+
+Recorded for _Terra Compose v1.3_
+
+![](_demo/screencasts/tc-advanced.gif)
+
+```shell
 ### projects/portal/app >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# use-cases: nested folder structure, backend-config, hooks and shell into container
+### example: nested project structure, backend-config option, hooks and shell action
+
+# let's check the project structure
 tree projects/portal
+
+# we will use app component of the portal project for the demo
 tree projects/portal/app && tc | grep -A 5 'portal_app_'
 
-# use-case: backend-config and hooks
+### example: backend-config and hooks
+# plan action
 tc plan portal_app_INT
+# apply action, skipping init and validation steps
 tc apply-debug portal_app_INT
 
 # check that experiment state has been changed
@@ -139,17 +162,18 @@ tree projects/portal/app
 # check that we have +1 SGs
 list-aws-sgs
 
-# use-case: hook usage and shell into container
+### example: hook usage and shell into container
 # still contains info about the experiment state
 tree projects/portal/app/.terraform
-# proving that, shelling into container
+# let's prove that, shelling into container
 tc shell portal_app_LIVE
 
-### inside container ###
+### inside the container ###
 terraform workspace list
 exit
-###
+### END ###
 
+# simple plan action run will handle that for us
 tc plan portal_app_LIVE
 tc apply-debug portal_app_LIVE
 
@@ -160,71 +184,27 @@ list-aws-sgs
 </details>
 
 
-<details>
-<summary>
-
-##### Full demo script (Terra Compose v1.0)
-
-</summary>
-
-```shell
-echo "We must provide a \$AWS_PROFILE env variable" >/dev/null
-export AWS_PROFILE=demmonico
-
-aws ec2 describe-vpcs --region eu-central-1 --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==`Name`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager
-aws ec2 describe-security-groups --region eu-central-1 --output text --query "SecurityGroups[*].[GroupName, VpcId]" --no-cli-pager
-
-echo "Then we can run any Terraform command against any project we have" >/dev/null
-echo "We can use a shortcuts for 'plan', 'apply' and 'workspaces'..." >/dev/null
-tree common
-tc run common_STG terraform init
-tc workspaces common_STG
-tc plan common_STG
-echo "Or we can proxy calls via 'run' command..." >/dev/null
-tc run common_STG state list
-tc apply common_STG
-tc run common_STG state list
-
-tree projects/portal/platform
-tc plan-debug portal_platform_INT
-tc apply-debug portal_platform_INT
-
-echo "Or we can have a full control over jumping into shell..." >/dev/null
-tree environments/docs
-tc shell docs
-terraform workspace list
-terraform plan
-exit
-
-aws ec2 describe-vpcs --region eu-central-1 --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==`Name`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager
-aws ec2 describe-security-groups --region eu-central-1 --output text --query "SecurityGroups[*].[GroupName, VpcId]" --no-cli-pager
-
-echo "For sure, we can check commands list and aliases using 'help' command..." >/dev/null
-tc help
-```
-
-</details>
-
 
 <details>
 <summary>
 
-##### Short demo script (Terra Compose v1.0)
+### Snippets for presentation
 
 </summary>
 
+Useful for development/presentation
+
 ```shell
-export AWS_PROFILE=demmonico
-aws ec2 describe-vpcs --region eu-central-1 --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==`Name`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager
-tc workspaces common_STG
-tc plan common_STG
-tc apply common_STG
-aws ec2 describe-vpcs --region eu-central-1 --output text --query 'Vpcs[*].{VpcId:VpcId,Name:Tags[?Key==`Name`].Value|[0],CidrBlock:CidrBlock}' --no-cli-pager
+# list of available commands
+tc | grep -B 15 '>>>'
+# list of available aliases
+tc | grep -E '^(\s)+[A-Za-z0-9_]+:(\s)*$' | sed -e 's/^[[:space:]]*//' | awk -F ":" '{print $1}'
 
-export AWS_PROFILE=demmonico
-tc plan common_STG
-
-tc apply common_STG
+# record term
+ttyrec /tmp/tc-install
+# OR ttyrec -a /tmp/tc-install
+ttygif /tmp/tc-install -f
+ttyplay /tmp/tc-install
 ```
 
 </details>
@@ -233,15 +213,8 @@ tc apply common_STG
 
 ## Misc
 
-Useful for development\presentation
-```shell
-# list of available commands
-tc | grep -B 15 '>>>'
-# list of available aliases
-tc | grep -E '^(\s)+[A-Za-z0-9_]+:(\s)*$' | sed -e 's/^[[:space:]]*//' | awk -F ":" '{print $1}'
-```
-
 **[!!! IMPORTANT !!!]** Following instructions should be used **VERY CAREFULLY!**
+
 ```shell
 # remove existing non-default VPCs if needed
 for id in $( \
@@ -268,12 +241,4 @@ find . -type d -name '.terraform' -exec sudo rm -rf {} \;
 
 # find all TF state changes
 find . -type f -name '*.tfstate.backup'
-```
-
-Useful for presentation
-```shell
-ttyrec ~/Documents/tc-install
-# OR ttyrec -a ~/Documents/tc-install
-ttygif ~/Documents/tc-install -f
-ttyplay ~/Documents/tc-install
 ```
