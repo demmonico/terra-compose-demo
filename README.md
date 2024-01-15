@@ -203,15 +203,24 @@ tc | grep -E '^(\s)+[A-Za-z0-9_]+:(\s)*$' | sed -e 's/^[[:space:]]*//' | awk -F 
 # record term
 ttyrec /tmp/tc-install
 # OR ttyrec -a /tmp/tc-install
-ttygif /tmp/tc-install -f
+
+# play records
 ttyplay /tmp/tc-install
+
+# create a gif out of it
+ttygif /tmp/tc-install -f
 ```
 
 </details>
 
 
 
+<details>
+<summary>
+
 ## Misc
+
+</summary>
 
 **[!!! IMPORTANT !!!]** Following instructions should be used **VERY CAREFULLY!**
 
@@ -242,3 +251,5 @@ find . -type d -name '.terraform' -exec sudo rm -rf {} \;
 # find all TF state changes
 find . -type f -name '*.tfstate.backup'
 ```
+
+</details>
