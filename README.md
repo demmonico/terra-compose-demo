@@ -217,6 +217,9 @@ ttyrec /tmp/tc-install
 
 # play records
 ttyplay /tmp/tc-install
+# or better way (supports playback controls) - termplay
+# installs via brew, source - https://github.com/kilobyte/termrec
+termplay /tmp/tc-install
 
 # create a gif out of it
 ttygif /tmp/tc-install -f
